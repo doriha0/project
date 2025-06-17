@@ -97,3 +97,84 @@ HDC dc = GetDC(hwnd);
     return 0;
 }
 ```
+
+
+
+# openGL 주전자 회전시키기
+
+FreeGLUT를 이용해 빨간색 와이어프레임 주전자를 회전시키는 간단한 예제입니다.
+
+---
+
+## 1. 헤더 포함과 전역 변수 선언
+
+```cpp
+#include <GL/freeglut.h>
+
+float angle = 0.0f;
+```
+
+## 2. 화면 출력 함수 (display)
+
+```cpp
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    gluLookAt(0, 0, 3,   
+              0, 0, 0,
+              0, 1, 0);  
+
+    glRotatef(angle, 0.0f, 1.0f, 0.0f);
+
+    glColor3f(1.0f, 0.0f, 0.0f); 
+
+    glutWireTeapot(0.5);  
+
+    glutSwapBuffers();
+}
+```
+## 3. 타이머 함수 (timer)
+
+```cpp
+void timer(int value) {
+    angle += 1.0f;
+    if (angle > 360.0f) angle -= 360.0f;
+    glutPostRedisplay();
+    glutTimerFunc(16, timer, 0);
+}
+```
+## 4. 창 크기 변경 처리 함수 (reshape)
+
+```cpp
+void reshape(int w, int h) {
+    if (h == 0) h = 1;
+    float ratio = (float)w / (float)h;
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(45.0, ratio, 1.0, 100.0);
+
+    glViewport(0, 0, w, h);
+}
+```
+## 5. main 함수 및 초기화
+
+```cpp
+int main(int argc, char** argv) {
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitWindowSize(800, 600);
+    glutCreateWindow("Red Wireframe Teapot");
+
+    glEnable(GL_DEPTH_TEST);
+
+    glutDisplayFunc(display);
+    glutReshapeFunc(reshape);
+    glutTimerFunc(0, timer, 0);
+
+    glutMainLoop();
+    return 0;
+}
+```
